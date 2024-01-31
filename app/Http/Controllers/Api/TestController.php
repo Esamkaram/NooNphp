@@ -160,16 +160,32 @@ class TestController extends Controller
         $firestore = $factory->createFirestore();
         $database = $firestore->database();
 
-        $firebaseData = [
-            'status' => $data['status'],
-            'order_id' => $database->collection('orders')->document($data['order_id']),
-        ];
-        $database->collection('driver_orders')->document($data['driver_id'])
-            ->collection('orders')->document($data['order_id'])->set($firebaseData);
+        $tripData = [[
+            'path' => 'status',
+            'value' => $data['status'],
+        ]];
 
-        return response()->json();
+        if (!empty($data['driver_id'])){
+            $firebaseData = [
+                'status' => $data['status'],
+                'order_id' => $database->collection('orders')->document($data['order_id']),
+            ];
+            $database->collection('driver_orders')->document($data['driver_id'])
+                ->collection('orders')->document($data['order_id'])->set($firebaseData);
+
+
+            $tripData[] = [
+                'path' => 'driver_ref',
+                'value' =>  $database->collection('drivers')->document($data['driver_id']),
+        ];
+        }
+        $collection = $database->collection('orders');
+        $document = $collection->document($data['order_id']);
+
+        $document->update($tripData);
+
+        return $this->setCode(200)->setData([])->setMessage('Status Updated Successfully')->send();
     }
 }
 
 
-    
