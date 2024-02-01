@@ -165,19 +165,25 @@ class TestController extends Controller
             'value' => $data['status'],
         ]];
 
-        if (!empty($data['driver_id'])){
-            $firebaseData = [
-                'status' => $data['status'],
-                'order_id' => $database->collection('orders')->document($data['order_id']),
-            ];
-            $database->collection('driver_orders')->document($data['driver_id'])
-                ->collection('orders')->document($data['order_id'])->set($firebaseData);
+        if (!empty($data['driver_id'])) {
+            if (in_array($data['status'], ['delivered', 'unDelivered'])) {
+                $database->collection('driver_orders')->document($data['driver_id'])
+                    ->collection('orders')->document($data['order_id'])
+                    ->delete();
+            } else {
+                $firebaseData = [
+                    'status' => $data['status'],
+                    'order_id' => $database->collection('orders')->document($data['order_id']),
+                ];
+                $database->collection('driver_orders')->document($data['driver_id'])
+                    ->collection('orders')->document($data['order_id'])->set($firebaseData);
 
 
-            $tripData[] = [
-                'path' => 'driver_ref',
-                'value' =>  $database->collection('drivers')->document($data['driver_id']),
-        ];
+                $tripData[] = [
+                    'path' => 'driver_ref',
+                    'value' => $database->collection('drivers')->document($data['driver_id']),
+                ];
+            }
         }
         $collection = $database->collection('orders');
         $document = $collection->document($data['order_id']);
