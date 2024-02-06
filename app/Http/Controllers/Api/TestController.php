@@ -166,7 +166,7 @@ class TestController extends Controller
         ]];
 
         if (!empty($data['driver_id'])) {
-            if (in_array($data['status'], ['delivered', 'unDelivered'])) {
+            if (in_array($data['status'], ['delivered', 'unDelivered', 'unRecived', 'unReceived', 'recived', 'received'])) {
                 $database->collection('driver_orders')->document($data['driver_id'])
                     ->collection('orders')->document($data['order_id'])
                     ->delete();
